@@ -15,7 +15,7 @@ private:
     int _myRank, _nbTasks;
 
     // -------- OTHER -------- // 
-    double gaussSeidel();
+    double gaussSeidel(int step);
     void initLimitCondition1();
     void initLimitCondition2();
     double f1(const double &x, const double &y) const;

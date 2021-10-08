@@ -83,62 +83,58 @@ void GaussSeidelSequentiel::saveData() const
     }
 }
 
-double GaussSeidelSequentiel::gaussSeidel()
+double GaussSeidelSequentiel::gaussSeidel(int step)
 {
-    double diffMax = 0; // Difference between the new and the old grid
-    Grid *newGrid;
-    newGrid = new Grid(0,0,_a,_b,_nx-2,_ny-2);
     double constant = _dx*_dx*_dy*_dy/(2.*_dx*_dx+2.*_dy*_dy);
     for (int i = 0;i<_nx-2;++i)
     {
         for (int j = 0;j<_ny-2;++j)
         {
-            if (i>0)
+            if ((i+j)%2==step) // if step = 0 we compute on red and black if step = 1
             {
-                newGrid->get(i,j) += constant*_grid->get(i-1,j)/(_dx*_dx);
+                if (i>0)
+                {
+                    _grid->get(i,j) += constant*_grid->get(i-1,j)/(_dx*_dx);
+                }
+                else
+                {
+                    _grid->get(i,j) += constant*_left[j]/(_dx*_dx);
+                }
+                if (j>0)
+                {
+                    _grid->get(i,j) += constant*_grid->get(i,j-1)/(_dy*_dy);
+                }
+                else
+                {
+                    _grid->get(i,j) += constant*_down[i]/(_dy*_dy);
+                }
+                if (i+1<_nx-2)
+                {
+                    _grid->get(i,j) += constant*_grid->get(i+1,j)/(_dx*_dx);
+                }
+                else
+                {
+                    _grid->get(i,j) += constant*_right[j]/(_dx*_dx);
+                }
+                if (j+1<_ny-2)
+                {
+                    _grid->get(i,j) += constant*_grid->get(i,j+1)/(_dy*_dy);
+                }
+                else
+                {
+                    _grid->get(i,j) += constant*_up[i]/(_dy*_dy);
+                }
+                if (MODE == 1)
+                {
+                    _grid->get(i,j) -= constant*f1(i*_dx+_dx,j*_dy+_dy);
+                }
+                else if (MODE == 2)
+                {
+                    _grid->get(i,j) -= constant*f2(i*_dx+_dx,j*_dy+_dy);
+                }
             }
-            else
-            {
-                newGrid->get(i,j) += constant*_left[j]/(_dx*_dx);
-            }
-            if (j>0)
-            {
-                newGrid->get(i,j) += constant*_grid->get(i,j-1)/(_dy*_dy);
-            }
-            else
-            {
-                newGrid->get(i,j) += constant*_down[i]/(_dy*_dy);
-            }
-            if (i+1<_nx-2)
-            {
-                newGrid->get(i,j) += constant*_grid->get(i+1,j)/(_dx*_dx);
-            }
-            else
-            {
-                newGrid->get(i,j) += constant*_right[j]/(_dx*_dx);
-            }
-            if (j+1<_ny-2)
-            {
-                newGrid->get(i,j) += constant*_grid->get(i,j+1)/(_dy*_dy);
-            }
-            else
-            {
-                newGrid->get(i,j) += constant*_up[i]/(_dy*_dy);
-            }
-            if (MODE == 1)
-            {
-                newGrid->get(i,j) -= constant*f1(i*_dx+_dx,j*_dy+_dy);
-            }
-            else if (MODE == 2)
-            {
-                newGrid->get(i,j) -= constant*f2(i*_dx+_dx,j*_dy+_dy);
-            }
-            //diffMax = max(diffMax,abs(newGrid->get(i,j)-_grid->get(i,j)));
         }
     }
-    delete _grid;
-    _grid = newGrid;
-    return diffMax;
 }
 
 void GaussSeidelSequentiel::initLimitCondition1()
