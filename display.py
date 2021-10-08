@@ -29,6 +29,19 @@ plt.figure()
 plt.imshow(line)
 plt.savefig("par.png", dpi=150)
 
+fil = open("gaussSeidelSeq.txt","r")
+line = fil.readlines()
+fil.close()
+line = [line[i][:-1] for i in range(0,len(line))]
+for i in range(0,len(line)):
+    line[i] = line[i].split()
+    for j in range(0,len(line[i])):
+        line[i][j]=float(line[i][j])
+
+plt.figure()
+plt.imshow(line)
+plt.savefig("seqGS.png", dpi=150)
+
 P = [1,2,5,10,20,40,80]
 L100 = [3.49605,1.70169,0.710672,0.383819,0.215062,0.182067,0.190505]
 L100e = [3.49605/p for p in P]

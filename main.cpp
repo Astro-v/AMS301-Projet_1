@@ -37,18 +37,20 @@ int main(int argc, char* argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &nbTasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    /*JacobiSequentiel seq(argc,argv);
-    double timeSeq = seq.resolve();
-    seq.saveData();
+
     if (myRank==0)
     {
-        cout << "Temps séquentiel : " << timeSeq << endl;
-    }*/
+        JacobiSequentiel seqJ(argc,argv);
+        double timeSeq = seqJ.resolve();
+        seqJ.saveData();
+        cout << "Temps pour jacobi séquentiel : " << timeSeq << endl;
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
             
-    JacobiParallelise par(argc,argv);
-    double timePar = par.resolve();
+    JacobiParallelise parJ(argc,argv);
+    double timePar = parJ.resolve();
+    parJ.saveData();
     if (myRank==0)
     {
         cout << "Temps pour jacobi parallelise pour " << nbTasks << " coeur : " << timePar << endl;
@@ -56,11 +58,13 @@ int main(int argc, char* argv[])
 
     MPI_Barrier(MPI_COMM_WORLD);
             
-    GaussSeidelSequentiel seq(argc,argv);
-    double timeSeq = seq.resolve();
+
     if (myRank==0)
     {
-        cout << "Temps pour Gauss-Seidel sequentiel pour " << nbTasks << " coeur : " << timeSeq << endl;
+        GaussSeidelSequentiel seqG(argc,argv);
+        double timeSeq = seqG.resolve();
+        seqG.saveData();
+        cout << "Temps pour Gauss-Seidel sequentiel : " << " coeur : " << timeSeq << endl;
     }
     
 

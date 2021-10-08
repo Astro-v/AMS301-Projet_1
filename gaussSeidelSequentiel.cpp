@@ -94,6 +94,7 @@ double GaussSeidelSequentiel::gaussSeidel(int step)
         {
             if ((i+j)%2==step) // if step = 0 we compute on red and black if step = 1
             {
+                _grid->get(i,j) = 0;
                 if (i>0)
                 {
                     _grid->get(i,j) += constant*_grid->get(i-1,j)/(_dx*_dx);

@@ -2,9 +2,9 @@
 #ifndef __CONSTANT_HPP__
 #define __CONSTANT_HPP__
 
-    #define MAX_STEP 10000
+    #define MAX_STEP 4000
     #define MAX_DIFF 0.00001
-    #define MODE 1
+    #define MODE 2
 
     #define NX_INIT 100
     #define NY_INIT 100
