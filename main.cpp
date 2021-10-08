@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 
     MPI_Barrier(MPI_COMM_WORLD);
             
-    gaussSeidelSequentiel seq(argc,argv);
+    GaussSeidelSequentiel seq(argc,argv);
     double timeSeq = seq.resolve();
     if (myRank==0)
     {

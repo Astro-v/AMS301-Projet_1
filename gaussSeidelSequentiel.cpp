@@ -62,10 +62,10 @@ double GaussSeidelSequentiel::resolve()
             k += 1;
 
             // Compute next step for red
-            diff = gaussSeidel(0);
+            gaussSeidel(0);
 
             // Compute next step for black
-            diff = gaussSeidel(1);
+            gaussSeidel(1);
 
         }while (k<=MAX_STEP);
         double timeEnd = MPI_Wtime();
