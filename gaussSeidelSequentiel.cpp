@@ -57,13 +57,15 @@ double GaussSeidelSequentiel::resolve()
     {
         double timeInit = MPI_Wtime();
         int k = 0;
-        double diff;
         do
         {
             k += 1;
 
-            // Compute next step
-            diff = jacobi();
+            // Compute next step for red
+            diff = gaussSeidel(0);
+
+            // Compute next step for black
+            diff = gaussSeidel(1);
 
         }while (k<=MAX_STEP);
         double timeEnd = MPI_Wtime();
