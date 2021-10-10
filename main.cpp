@@ -25,6 +25,7 @@ mpirun -np 4 ./a.out 1 1 1 0.5 11 11
 #include "jacobiSequentiel.hpp"
 #include "jacobiParallelise.hpp"
 #include "gaussSeidelSequentiel.hpp"
+#include "gaussSeidelParallelise.hpp"
 
 using namespace std;
 
@@ -49,11 +50,11 @@ int main(int argc, char* argv[])
     MPI_Barrier(MPI_COMM_WORLD);
             
     JacobiParallelise parJ(argc,argv);
-    double timePar = parJ.resolve();
+    double timeParJ = parJ.resolve();
     parJ.saveData();
     if (myRank==0)
     {
-        cout << "Temps pour jacobi parallelise pour " << nbTasks << " coeur : " << timePar << endl;
+        cout << "Temps pour jacobi parallelise pour " << nbTasks << " coeur : " << timeParJ << endl;
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -64,17 +65,17 @@ int main(int argc, char* argv[])
         GaussSeidelSequentiel seqG(argc,argv);
         double timeSeq = seqG.resolve();
         seqG.saveData();
-        cout << "Temps pour Gauss-Seidel sequentiel : " << " coeur : " << timeSeq << endl;
+        cout << "Temps pour Gauss-Seidel sequentiel : " << timeSeq << endl;
     }
     
     MPI_Barrier(MPI_COMM_WORLD);
             
     GaussSeidelParallelise parG(argc,argv);
-    double timePar = parG.resolve();
+    double timeParG = parG.resolve();
     parG.saveData();
     if (myRank==0)
     {
-        cout << "Temps pour Gauss-Seidel parallelise pour " << nbTasks << " coeur : " << timePar << endl;
+        cout << "Temps pour Gauss-Seidel parallelise pour " << nbTasks << " coeur : " << timeParG << endl;
     }
 
     // Finalize MPI

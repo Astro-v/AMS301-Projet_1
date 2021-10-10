@@ -19,7 +19,7 @@ private:
 
     // -------- OTHER -------- // 
     void init();
-    void gaussSeidel(); // Jacobi method
+    void gaussSeidel(int step); // Gauss Seidel method
     void exchangeData(); // Exchange data with the others process
 
 public:

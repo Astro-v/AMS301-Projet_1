@@ -26,14 +26,13 @@ _dx(_a/(_nx-1)), _dy(_b/(_ny-1))
     _nxf = round(1+(_xf-_x0)*double(_nx-2)/(_a-_dx));
     _nyf = _ny-2;
     int nxPrevious = 0;
-    for (int ranks=0;i<_myRank;++i)
+    for (int ranks=0;ranks<_myRank;++ranks)
     {
         double x0_tmp = (_a-_dx)*ceil((_nx-2)*double(ranks)/_nbTasks+1)/double(_nx-2);
         double xf_tmp = (_a-_dx)*ceil((_nx-2)*double(ranks+1)/_nbTasks)/double(_nx-2);
         nxPrevious += round(1+(xf_tmp-x0_tmp)*double(_nx-2)/(_a-_dx));
     }
     _parity = nxPrevious%2;
-
 
     // Grid matrice
     _grid = new Grid(_x0,_y0,_xf,_yf,_nxf,_nyf);
@@ -110,9 +109,13 @@ double GaussSeidelParallelise::resolve()
 
         // Exchanging data
         exchangeData();
+        // Compute next step for red
+        gaussSeidel(0);
 
-        // Compute next step
-        gaussSeidel();
+        // Exchanging data
+        exchangeData();
+        // Compute next step for black
+        gaussSeidel(1);
 
     } while (k<=MAX_STEP);
     // Check time
@@ -150,7 +153,7 @@ void GaussSeidelParallelise::gaussSeidel(int step)
     {
         for (int j = 0;j<_nyf;++j)
         {
-             if ((i+j)%2==step+_parity) // if step = 0 we compute on red and black if step = 1
+             if ((i+j)%2==(step+_parity)%2) // if step = 0 we compute on red and black if step = 1
             {
                 _grid->get(i,j) = 0;
                 if (i>0)
