@@ -132,9 +132,9 @@ void GaussSeidelParallelise::saveData() const
         {
             ofstream file;
             if(_myRank == 0){
-                file.open("jacobiPara.txt", ios::out);
+                file.open("gaussSeidelPara.txt", ios::out);
             } else {
-                file.open("jacobiPara.txt", ios::app);
+                file.open("gaussSeidelPara.txt", ios::app);
             }
             file << *_grid;
             file.close();

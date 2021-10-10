@@ -67,6 +67,15 @@ int main(int argc, char* argv[])
         cout << "Temps pour Gauss-Seidel sequentiel : " << " coeur : " << timeSeq << endl;
     }
     
+    MPI_Barrier(MPI_COMM_WORLD);
+            
+    GaussSeidelParallelise parG(argc,argv);
+    double timePar = parG.resolve();
+    parG.saveData();
+    if (myRank==0)
+    {
+        cout << "Temps pour Gauss-Seidel parallelise pour " << nbTasks << " coeur : " << timePar << endl;
+    }
 
     // Finalize MPI
     MPI_Finalize();
