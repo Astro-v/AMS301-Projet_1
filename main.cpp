@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
 
-    if (myRank==0)
+   /* if (myRank==0)
     {
         JacobiSequentiel seqJ(argc,argv);
         double timeSeq = seqJ.resolve();
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
         double timeSeq = seqG.resolve();
         seqG.saveData();
         cout << "Temps pour Gauss-Seidel sequentiel : " << timeSeq << endl;
-    }
+    }*/
     
     MPI_Barrier(MPI_COMM_WORLD);
             

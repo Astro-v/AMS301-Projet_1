@@ -25,6 +25,7 @@
         // -------- ACCESSOR -------- //
         int dim(int const&) const; // READ only (_nx, _ny)
         void getSide(double vec[], const Side side); // READ only (_grid)
+        void getSide(double vec[], const Side side, const int step);
 
         // -------- OPERATOR -------- //
         double& operator ()(int const&, int const&); // READ & WRITE (_grid)

@@ -14,13 +14,15 @@ private:
     double _dx, _dy;
     Grid *_grid;
     int _myRank, _nbTasks;
-    double *_left, *_right, *_up, *_down;
+    double *_leftE, *_rightE; // Even 
+    double *_leftO, *_rightO; // Odd
+    double _up, _down;
     int _parity; // Parity of the pos (0,0) of _grid
 
     // -------- OTHER -------- // 
     void init();
     void gaussSeidel(int step); // Gauss Seidel method
-    void exchangeData(); // Exchange data with the others process
+    void exchangeData(int step); // Exchange data with the others process
 
 public:
     // -------- CREATOR -------- //

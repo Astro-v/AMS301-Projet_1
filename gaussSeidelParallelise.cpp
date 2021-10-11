@@ -38,8 +38,10 @@ _dx(_a/(_nx-1)), _dy(_b/(_ny-1))
     _grid = new Grid(_x0,_y0,_xf,_yf,_nxf,_nyf);
 
     // Limit condition
-    _left = new double[_nyf];
-    _right = new double[_nyf];
+    _leftE = new double[_nyf/2+1];
+    _rightE = new double[_nyf/2+1];
+    _leftO = new double[_nyf/2+1];
+    _rightO = new double[_nyf/2+1];
     _up = new double[_nxf];
     _down = new double[_nxf];
 
@@ -50,8 +52,10 @@ _dx(_a/(_nx-1)), _dy(_b/(_ny-1))
 
 GaussSeidelParallelise::~GaussSeidelParallelise()
 {
-    delete _left;
-    delete _right;
+    delete _leftE;
+    delete _rightE;
+    delete _leftO;
+    delete _rightO;
     delete _up;
     delete _down;
     delete _grid;
@@ -72,19 +76,31 @@ void GaussSeidelParallelise::init()
     {
         if (_myRank+1 == _nbTasks)
         {
-            _right[i] = _u0;
+            if ((_parity+_nxf+1)%2==0 && i%2==0) {_rightE[i/2] = _u0;}
+            else if ((_parity+_nxf+1)%2==0 && i%2==1) {_rightO[(i-1)/2] = _u0;}
+            else if ((_parity+_nxf+1)%2==1 && i%2==0) {_rightO[i/2] = _u0;}
+            else {_rightE[(i-1)/2] = _u0;}
         }
         else 
         {
-            _right[i] = 0;
+            if ((_parity+_nxf+1)%2==0 && i%2==0) {_rightE[i/2] = 0;}
+            else if ((_parity+_nxf+1)%2==0 && i%2==1) {_rightO[(i-1)/2] = 0;}
+            else if ((_parity+_nxf+1)%2==1 && i%2==0) {_rightO[i/2] = 0;}
+            else {_rightE[(i-1)/2] = 0;}
         }
         if (_myRank == 0)
         {
-            _left[i] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));
+            if ((_parity+1)%2==0 && i%2==0) {_leftE[i/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
+            else if ((_parity+1)%2==0 && i%2==1) {_leftO[(i-1)/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
+            else if ((_parity+1)%2==1 && i%2==0) {_leftO[i/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
+            else {_leftE[(i-1)/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
         }
         else 
         {
-            _left[i] = 0;
+            if ((_parity+1)%2==0 && i%2==0) {_leftE[i/2] = 0;}
+            else if ((_parity+1)%2==0 && i%2==1) {_leftO[(i-1)/2] = 0;}
+            else if ((_parity+1)%2==1 && i%2==0) {_leftO[i/2] = 0;}
+            else {_leftE[(i-1)/2] = 0;}
         }
     }
     for (int i=0;i<_nxf;++i)
@@ -108,12 +124,12 @@ double GaussSeidelParallelise::resolve()
         k += 1;
 
         // Exchanging data
-        exchangeData();
+        exchangeData(1);
         // Compute next step for red
         gaussSeidel(0);
 
         // Exchanging data
-        exchangeData();
+        exchangeData(0);
         // Compute next step for black
         gaussSeidel(1);
 
@@ -162,7 +178,11 @@ void GaussSeidelParallelise::gaussSeidel(int step)
                 }
                 else
                 {
-                    _grid->get(i,j) += constant*_left[j]/(_dx*_dx);
+                    if ((_parity+1)%2==0 && j%2==0) {_grid->get(i,j) += constant*_leftE[j/2]/(_dx*_dx);}
+                    else if ((_parity+1)%2==0 && j%2==1) {_grid->get(i,j) += constant*_leftO[(j-1)/2]/(_dx*_dx);}
+                    else if ((_parity+1)%2==1 && j%2==0) {_grid->get(i,j) += constant*_leftO[j/2]/(_dx*_dx);}
+                    else {_grid->get(i,j) += constant*_left[(j-1)/2]/(_dx*_dx);}
+                    
                 }
                 if (j>0)
                 {
@@ -178,7 +198,10 @@ void GaussSeidelParallelise::gaussSeidel(int step)
                 }
                 else
                 {
-                    _grid->get(i,j) += constant*_right[j]/(_dx*_dx);
+                    if ((_parity+_nxf+1)%2==0 && j%2==0) {_grid->get(i,j) += constant*_rightE[j/2]/(_dx*_dx);}
+                    else if ((_parity+_nxf+1)%2==0 && j%2==1) {_grid->get(i,j) += constant*_rightO[(j-1)/2]/(_dx*_dx);}
+                    else if ((_parity+_nxf+1)%2==1 && j%2==0) {_grid->get(i,j) += constant*_rightO[j/2]/(_dx*_dx);}
+                    else {_grid->get(i,j) += constant*_rightE[(j-1)/2]/(_dx*_dx);}
                 }
                 if (j+1<_nyf)
                 {
@@ -193,41 +216,55 @@ void GaussSeidelParallelise::gaussSeidel(int step)
     }
 }
 
-void GaussSeidelParallelise::exchangeData()
+void GaussSeidelParallelise::exchangeData(int step)
 {
     // MPI Exchanges (with left side)
     MPI_Request reqSendLeft, reqRecvLeft;
     if(_myRank > 0)
     {
-        double toSend[_nyf];
-        _grid->getSide(toSend, LEFT);
+        double toSend[_nyf/2+1];
+        _grid->getSide(toSend, LEFT, (_parity+step)%2);
         MPI_Isend(&toSend, _nyf, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqSendLeft);
-        MPI_Irecv(_left, _nyf, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqRecvLeft);
+        if ((_parity+step+1)%2==0)
+        {
+            MPI_Irecv(_leftE, _nyf/2+1, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqRecvLeft);
+        }
+        else
+        {
+            MPI_Irecv(_leftO, _nyf/2+1, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqRecvLeft);
+        }
     }
-    else
+    /*else
     {
         for (int i=0;i<_nyf;++i)
         {
             _left[i] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));
         }
-    }
+    }*/
 
     // MPI Exchanges (with right side)
     MPI_Request reqSendRight, reqRecvRight;
     if(_myRank < _nbTasks-1)
     {
-        double toSend[_nyf];
-        _grid->getSide(toSend, RIGHT);
+        double toSend[_nyf/2+1];
+        _grid->getSide(toSend, RIGHT, (_parity+step)%2);
         MPI_Isend(&toSend, _nyf, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqSendRight);
-        MPI_Irecv(_right, _nyf, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqRecvRight);    
+        if ((_parity+step+1)%2==0)
+        {
+            MPI_Irecv(_rightE, _nyf/2+1, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqRecvRight);    
+        }
+        else
+        {
+            MPI_Irecv(_right0, _nyf/2+1, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqRecvRight);    
+        }
     }
-    else
+    /*else
     {
         for (int i=0;i<_nyf;++i)
         {
             _right[i] = _u0;     
         }
-    }
+    }*/
 
     
     // MPI Exchanges (check everything is send/recv)
