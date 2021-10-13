@@ -2,7 +2,7 @@
 #ifndef __CONSTANT_HPP__
 #define __CONSTANT_HPP__
 
-    #define MAX_STEP 4000
+    #define MAX_STEP 10000
     #define MAX_DIFF 0.00001
     #define MODE 2
 

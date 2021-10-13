@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
         cout << "Temps pour jacobi séquentiel : " << timeSeq << endl;
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);*/
             
     JacobiParallelise parJ(argc,argv);
     double timeParJ = parJ.resolve();
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         cout << "Temps pour jacobi parallelise pour " << nbTasks << " coeur : " << timeParJ << endl;
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    /*MPI_Barrier(MPI_COMM_WORLD);
             
 
     if (myRank==0)

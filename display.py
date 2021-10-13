@@ -14,7 +14,8 @@ for i in range(0,len(line)):
 
 plt.figure()
 plt.imshow(line)
-plt.savefig("seq.png", dpi=150)
+plt.colorbar()
+plt.savefig("seqJ.png", dpi=150)
 
 fil = open("jacobiPara.txt","r")
 line = fil.readlines()
@@ -27,7 +28,8 @@ for i in range(0,len(line)):
 
 plt.figure()
 plt.imshow(line)
-plt.savefig("par.png", dpi=150)
+plt.colorbar()
+plt.savefig("parJ.png", dpi=150)
 
 fil = open("gaussSeidelSeq.txt","r")
 line = fil.readlines()
@@ -40,6 +42,7 @@ for i in range(0,len(line)):
 
 plt.figure()
 plt.imshow(line)
+plt.colorbar()
 plt.savefig("seqGS.png", dpi=150)
 
 
@@ -54,6 +57,7 @@ for i in range(0,len(line)):
 
 plt.figure()
 plt.imshow(line)
+plt.colorbar()
 plt.savefig("parGS.png", dpi=150)
 
 P = [1,2,5,10,20,40,80]

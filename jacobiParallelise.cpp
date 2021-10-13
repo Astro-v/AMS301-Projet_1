@@ -36,7 +36,8 @@ _dx(_a/(_nx-1)), _dy(_b/(_ny-1))
     _up = new double[_nxf];
     _down = new double[_nxf];
 
-    init();
+    if (MODE == 1){init1();}
+    else if (MODE == 2){init2();}
 }
 
 // -------- DESTRUCTOR -------- //
@@ -59,7 +60,7 @@ int JacobiParallelise::getRank() const
 
 // -------- OTHER -------- // 
 
-void JacobiParallelise::init()
+void JacobiParallelise::init1()
 {
     for (int i=0;i<_nyf;++i)
     {
@@ -84,6 +85,34 @@ void JacobiParallelise::init()
     {
         _up[i] = _u0;
         _down[i] = _u0;
+    }
+}
+
+void JacobiParallelise::init2()
+{
+    for (int i=0;i<_nyf;++i)
+    {
+        if (_myRank+1 == _nbTasks)
+        {
+            _right[i] = sin(M_PI*(1-(_y0+i*_dy)/_b));
+        }
+        else 
+        {
+            _right[i] = 0;
+        }
+        if (_myRank == 0)
+        {
+            _left[i] = sin(M_PI*(1-(_y0+i*_dy)/_b));
+        }
+        else 
+        {
+            _left[i] = 0;
+        }
+    }
+    for (int i=0;i<_nxf;++i)
+    {
+        _up[i] = 0;
+        _down[i] = 0;
     }
 }
 
@@ -176,6 +205,14 @@ void JacobiParallelise::jacobi()
             {
                 newGrid->get(i,j) += constant*_up[i]/(_dy*_dy);
             }
+            if (MODE == 1)
+            {
+                newGrid->get(i,j) -= constant*f1(i*_dx+_x0,j*_dy+_y0);
+            }
+            else if (MODE == 2)
+            {
+                newGrid->get(i,j) -= constant*f2(i*_dx+_x0,j*_dy+_y0);
+            }
         }
     }
     delete _grid;
@@ -193,13 +230,7 @@ void JacobiParallelise::exchangeData()
         MPI_Isend(&toSend, _nyf, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqSendLeft);
         MPI_Irecv(_left, _nyf, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqRecvLeft);
     }
-    else
-    {
-        for (int i=0;i<_nyf;++i)
-        {
-            _left[i] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));
-        }
-    }
+
 
     // MPI Exchanges (with right side)
     MPI_Request reqSendRight, reqRecvRight;
@@ -210,13 +241,7 @@ void JacobiParallelise::exchangeData()
         MPI_Isend(&toSend, _nyf, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqSendRight);
         MPI_Irecv(_right, _nyf, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqRecvRight);    
     }
-    else
-    {
-        for (int i=0;i<_nyf;++i)
-        {
-            _right[i] = _u0;     
-        }
-    }
+
 
     
     // MPI Exchanges (check everything is send/recv)
@@ -248,3 +273,13 @@ void JacobiParallelise::exchangeData()
         }
     }
 }*/
+
+double JacobiParallelise::f1(const double &x, const double &y) const
+{
+    return 0;
+}
+
+double JacobiParallelise::f2(const double &x, const double &y) const
+{
+    return -M_PI*M_PI/(_b*_b)*sin(M_PI*(1-y/_b));
+}

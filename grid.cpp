@@ -148,8 +148,16 @@ void Grid::getSide(double vec[], const Side side, const int step)
     case RIGHT:
         for (int i=0;i<_ny;++i)
         {
-            if (step==0 && i%2==0){vec[i/2]=_grid[_nx-1][i];}
-            else if (step==1 && i%2==1){vec[(i-1)/2]=_grid[_nx-1][i];}
+            if ((_nx-1)%2==0)
+            {
+                if (step==0 && i%2==0){vec[i/2]=_grid[_nx-1][i];}
+                else if (step==1 && i%2==1){vec[(i-1)/2]=_grid[_nx-1][i];}
+            }
+            else
+            {
+                if (step==1 && i%2==0){vec[i/2]=_grid[_nx-1][i];}
+                else if (step==0 && i%2==1){vec[(i-1)/2]=_grid[_nx-1][i];}
+            }
         }
         break;
     }

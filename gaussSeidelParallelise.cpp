@@ -45,7 +45,8 @@ _dx(_a/(_nx-1)), _dy(_b/(_ny-1))
     _up = new double[_nxf];
     _down = new double[_nxf];
 
-    init();
+    if (MODE == 1){init1();}
+    else if (MODE == 2){init2();}
 }
 
 // -------- DESTRUCTOR -------- //
@@ -70,7 +71,7 @@ int GaussSeidelParallelise::getRank() const
 
 // -------- OTHER -------- // 
 
-void GaussSeidelParallelise::init()
+void GaussSeidelParallelise::init1()
 {
     for (int i=0;i<_nyf;++i)
     {
@@ -90,16 +91,16 @@ void GaussSeidelParallelise::init()
         }
         if (_myRank == 0)
         {
-            if ((_parity+1)%2==0 && i%2==0) {_leftE[i/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
-            else if ((_parity+1)%2==0 && i%2==1) {_leftO[(i-1)/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
-            else if ((_parity+1)%2==1 && i%2==0) {_leftO[i/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
+            if ((_parity)%2==0 && i%2==0) {_leftE[i/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
+            else if ((_parity)%2==0 && i%2==1) {_leftO[(i-1)/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
+            else if ((_parity)%2==1 && i%2==0) {_leftO[i/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
             else {_leftE[(i-1)/2] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));}
         }
         else 
         {
-            if ((_parity+1)%2==0 && i%2==0) {_leftE[i/2] = 0;}
-            else if ((_parity+1)%2==0 && i%2==1) {_leftO[(i-1)/2] = 0;}
-            else if ((_parity+1)%2==1 && i%2==0) {_leftO[i/2] = 0;}
+            if ((_parity)%2==0 && i%2==0) {_leftE[i/2] = 0;}
+            else if ((_parity)%2==0 && i%2==1) {_leftO[(i-1)/2] = 0;}
+            else if ((_parity)%2==1 && i%2==0) {_leftO[i/2] = 0;}
             else {_leftE[(i-1)/2] = 0;}
         }
     }
@@ -107,6 +108,46 @@ void GaussSeidelParallelise::init()
     {
         _up[i] = _u0;
         _down[i] = _u0;
+    }
+}
+
+void GaussSeidelParallelise::init2()
+{
+    for (int i=0;i<_nyf;++i)
+    {
+        if (_myRank+1 == _nbTasks)
+        {
+            if ((_parity+_nxf+1)%2==0 && i%2==0) {_rightE[i/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+            else if ((_parity+_nxf+1)%2==0 && i%2==1) {_rightO[(i-1)/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+            else if ((_parity+_nxf+1)%2==1 && i%2==0) {_rightO[i/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+            else {_rightE[(i-1)/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+        }
+        else 
+        {
+            if ((_parity+_nxf+1)%2==0 && i%2==0) {_rightE[i/2] = 0;}
+            else if ((_parity+_nxf+1)%2==0 && i%2==1) {_rightO[(i-1)/2] = 0;}
+            else if ((_parity+_nxf+1)%2==1 && i%2==0) {_rightO[i/2] = 0;}
+            else {_rightE[(i-1)/2] = 0;}
+        }
+        if (_myRank == 0)
+        {
+            if ((_parity)%2==0 && i%2==0) {_leftE[i/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+            else if ((_parity)%2==0 && i%2==1) {_leftO[(i-1)/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+            else if ((_parity)%2==1 && i%2==0) {_leftO[i/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+            else {_leftE[(i-1)/2] = sin(M_PI*(1-(_y0+i*_dy)/_b));}
+        }
+        else 
+        {
+            if ((_parity)%2==0 && i%2==0) {_leftE[i/2] = 0;}
+            else if ((_parity)%2==0 && i%2==1) {_leftO[(i-1)/2] = 0;}
+            else if ((_parity)%2==1 && i%2==0) {_leftO[i/2] = 0;}
+            else {_leftE[(i-1)/2] = 0;}
+        }
+    }
+    for (int i=0;i<_nxf;++i)
+    {
+        _up[i] = 0;
+        _down[i] = 0;
     }
 }
 
@@ -122,12 +163,10 @@ double GaussSeidelParallelise::resolve()
     do
     {
         k += 1;
-
         // Exchanging data
         exchangeData(1);
         // Compute next step for red
         gaussSeidel(0);
-
         // Exchanging data
         exchangeData(0);
         // Compute next step for black
@@ -169,7 +208,7 @@ void GaussSeidelParallelise::gaussSeidel(int step)
     {
         for (int j = 0;j<_nyf;++j)
         {
-             if ((i+j)%2==(step+_parity)%2) // if step = 0 we compute on red and black if step = 1
+            if ((i+j)%2==(step+_parity)%2) // if step = 0 we compute on red and black if step = 1
             {
                 _grid->get(i,j) = 0;
                 if (i>0)
@@ -178,11 +217,10 @@ void GaussSeidelParallelise::gaussSeidel(int step)
                 }
                 else
                 {
-                    if ((_parity+1)%2==0 && j%2==0) {_grid->get(i,j) += constant*_leftE[j/2]/(_dx*_dx);}
-                    else if ((_parity+1)%2==0 && j%2==1) {_grid->get(i,j) += constant*_leftO[(j-1)/2]/(_dx*_dx);}
-                    else if ((_parity+1)%2==1 && j%2==0) {_grid->get(i,j) += constant*_leftO[j/2]/(_dx*_dx);}
-                    else {_grid->get(i,j) += constant*_left[(j-1)/2]/(_dx*_dx);}
-                    
+                    if ((_parity+step)%2==0 && j%2==0) {_grid->get(i,j) += constant*_leftE[j/2]/(_dx*_dx);}
+                    else if ((_parity+step)%2==0 && j%2==1) {_grid->get(i,j) += constant*_leftO[(j-1)/2]/(_dx*_dx);}
+                    else if ((_parity+step)%2==1 && j%2==0) {_grid->get(i,j) += constant*_leftO[j/2]/(_dx*_dx);}
+                    else {_grid->get(i,j) += constant*_leftE[(j-1)/2]/(_dx*_dx);}
                 }
                 if (j>0)
                 {
@@ -198,9 +236,9 @@ void GaussSeidelParallelise::gaussSeidel(int step)
                 }
                 else
                 {
-                    if ((_parity+_nxf+1)%2==0 && j%2==0) {_grid->get(i,j) += constant*_rightE[j/2]/(_dx*_dx);}
-                    else if ((_parity+_nxf+1)%2==0 && j%2==1) {_grid->get(i,j) += constant*_rightO[(j-1)/2]/(_dx*_dx);}
-                    else if ((_parity+_nxf+1)%2==1 && j%2==0) {_grid->get(i,j) += constant*_rightO[j/2]/(_dx*_dx);}
+                    if ((_parity+_nxf+1+step)%2==0 && j%2==0) {_grid->get(i,j) += constant*_rightE[j/2]/(_dx*_dx);}
+                    else if ((_parity+_nxf+1+step)%2==0 && j%2==1) {_grid->get(i,j) += constant*_rightO[(j-1)/2]/(_dx*_dx);}
+                    else if ((_parity+_nxf+1+step)%2==1 && j%2==0) {_grid->get(i,j) += constant*_rightO[j/2]/(_dx*_dx);}
                     else {_grid->get(i,j) += constant*_rightE[(j-1)/2]/(_dx*_dx);}
                 }
                 if (j+1<_nyf)
@@ -210,6 +248,14 @@ void GaussSeidelParallelise::gaussSeidel(int step)
                 else
                 {
                     _grid->get(i,j) += constant*_up[i]/(_dy*_dy);
+                }
+                if (MODE == 1)
+                {
+                    _grid->get(i,j) -= constant*f1(i*_dx+_x0,j*_dy+_y0);
+                }
+                else if (MODE == 2)
+                {
+                    _grid->get(i,j) -= constant*f2(i*_dx+_x0,j*_dy+_y0);
                 }
             }
         }
@@ -222,9 +268,9 @@ void GaussSeidelParallelise::exchangeData(int step)
     MPI_Request reqSendLeft, reqRecvLeft;
     if(_myRank > 0)
     {
-        double toSend[_nyf/2+1];
+        double toSend[_nyf/2+1] = {0};
         _grid->getSide(toSend, LEFT, (_parity+step)%2);
-        MPI_Isend(&toSend, _nyf, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqSendLeft);
+        MPI_Isend(&toSend, _nyf/2+1, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqSendLeft);
         if ((_parity+step+1)%2==0)
         {
             MPI_Irecv(_leftE, _nyf/2+1, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqRecvLeft);
@@ -234,37 +280,24 @@ void GaussSeidelParallelise::exchangeData(int step)
             MPI_Irecv(_leftO, _nyf/2+1, MPI_DOUBLE, _myRank-1, 0, MPI_COMM_WORLD, &reqRecvLeft);
         }
     }
-    /*else
-    {
-        for (int i=0;i<_nyf;++i)
-        {
-            _left[i] = _u0*(1+_alpha*(1+cos(2*M_PI*((_y0+i*_dy)-_b/2.)/_b)));
-        }
-    }*/
 
     // MPI Exchanges (with right side)
     MPI_Request reqSendRight, reqRecvRight;
     if(_myRank < _nbTasks-1)
     {
-        double toSend[_nyf/2+1];
+        double toSend[_nyf/2+1] = {0};
         _grid->getSide(toSend, RIGHT, (_parity+step)%2);
-        MPI_Isend(&toSend, _nyf, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqSendRight);
-        if ((_parity+step+1)%2==0)
+        MPI_Isend(&toSend, _nyf/2+1, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqSendRight);
+        if ((_parity+step+_nxf)%2==0)
         {
             MPI_Irecv(_rightE, _nyf/2+1, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqRecvRight);    
         }
         else
         {
-            MPI_Irecv(_right0, _nyf/2+1, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqRecvRight);    
+            MPI_Irecv(_rightO, _nyf/2+1, MPI_DOUBLE, _myRank+1, 0, MPI_COMM_WORLD, &reqRecvRight);    
         }
     }
-    /*else
-    {
-        for (int i=0;i<_nyf;++i)
-        {
-            _right[i] = _u0;     
-        }
-    }*/
+
 
     
     // MPI Exchanges (check everything is send/recv)
@@ -296,3 +329,13 @@ void GaussSeidelParallelise::exchangeData(int step)
         }
     }
 }*/
+
+double GaussSeidelParallelise::f1(const double &x, const double &y) const
+{
+    return 0;
+}
+
+double GaussSeidelParallelise::f2(const double &x, const double &y) const
+{
+    return -M_PI*M_PI/(_b*_b)*sin(M_PI*(1-y/_b));
+}
