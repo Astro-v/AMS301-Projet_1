@@ -122,47 +122,6 @@ void Grid::getSide(double vec[], const Side side)
     }
 }
 
-void Grid::getSide(double vec[], const Side side, const int step)
-{
-    switch (side)
-    {
-    case DOWN:
-        for (int i=0;i<_nx;++i)
-        {
-            vec[i]=_grid[i][0];
-        }
-        break;
-    case UP:
-        for (int i=0;i<_nx;++i)
-        {
-            vec[i]=_grid[i][_ny-1];
-        }
-        break;
-    case LEFT:
-        for (int i=0;i<_ny;++i)
-        {
-            if (step==0 && i%2==0){vec[i/2]=_grid[0][i];}
-            else if (step==1 && i%2==1){vec[(i-1)/2]=_grid[0][i];}
-        }
-        break;
-    case RIGHT:
-        for (int i=0;i<_ny;++i)
-        {
-            if ((_nx-1)%2==0)
-            {
-                if (step==0 && i%2==0){vec[i/2]=_grid[_nx-1][i];}
-                else if (step==1 && i%2==1){vec[(i-1)/2]=_grid[_nx-1][i];}
-            }
-            else
-            {
-                if (step==1 && i%2==0){vec[i/2]=_grid[_nx-1][i];}
-                else if (step==0 && i%2==1){vec[(i-1)/2]=_grid[_nx-1][i];}
-            }
-        }
-        break;
-    }
-}
-
 // -------- OPERATOR -------- //
 
 double& Grid::operator ()(int const& i, int const& j)

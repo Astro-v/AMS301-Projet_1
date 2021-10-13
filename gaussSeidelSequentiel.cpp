@@ -92,7 +92,7 @@ double GaussSeidelSequentiel::gaussSeidel(int step)
     {
         for (int j = 0;j<_ny-2;++j)
         {
-            if ((i+j)%2==step) // if step = 0 we compute on red and black if step = 1
+            if ((i+j)%2==step) // if step = 0 we compute on even and odd if step = 1
             {
                 _grid->get(i,j) = 0;
                 if (i>0)

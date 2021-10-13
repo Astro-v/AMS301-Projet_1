@@ -14,8 +14,7 @@ private:
     double _dx, _dy;
     Grid *_grid;
     int _myRank, _nbTasks;
-    double *_leftE, *_rightE; // Even 
-    double *_leftO, *_rightO; // Odd
+    double *_left, *_right;
     double *_up, *_down;
     int _parity; // Parity of the pos (0,0) of _grid
 
@@ -23,7 +22,7 @@ private:
     void init1();
     void init2();
     void gaussSeidel(int step); // Gauss Seidel method
-    void exchangeData(int step); // Exchange data with the others process
+    void exchangeData(); // Exchange data with the others process
     double f1(const double &x, const double &y) const;
     double f2(const double &x, const double &y) const;
 
