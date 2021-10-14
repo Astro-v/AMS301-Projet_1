@@ -65,7 +65,7 @@ double JacobiSequentiel::resolve()
             // Compute next step
             diff = jacobi();
 
-        }while (k<=MAX_STEP);
+        }while (k<=MAX_STEP && diff>=MAX_DIFF);
         double timeEnd = MPI_Wtime();
         return timeEnd-timeInit;
     }
@@ -85,7 +85,7 @@ void JacobiSequentiel::saveData() const
 
 double JacobiSequentiel::jacobi()
 {
-    double diffMax = 0; // Difference between the new and the old grid
+    double diff = 0; // Difference between the new and the old grid
     Grid *newGrid;
     newGrid = new Grid(0,0,_a,_b,_nx-2,_ny-2);
     double constant = _dx*_dx*_dy*_dy/(2.*_dx*_dx+2.*_dy*_dy);
@@ -133,12 +133,12 @@ double JacobiSequentiel::jacobi()
             {
                 newGrid->get(i,j) -= constant*f2(i*_dx+_dx,j*_dy+_dy);
             }
-            //diffMax = max(diffMax,abs(newGrid->get(i,j)-_grid->get(i,j)));
+            diff += (newGrid->get(i,j)-_grid->get(i,j))*(newGrid->get(i,j)-_grid->get(i,j));
         }
     }
     delete _grid;
     _grid = newGrid;
-    return diffMax;
+    return sqrt(diff/((_nx-2)*(_ny-2)));
 }
 
 void JacobiSequentiel::initLimitCondition1()
@@ -187,4 +187,20 @@ double JacobiSequentiel::f1(const double &x, const double &y) const
 double JacobiSequentiel::f2(const double &x, const double &y) const
 {
     return -M_PI*M_PI/(_b*_b)*sin(M_PI*(1-y/_b));
+}
+
+double JacobiSequentiel::error() const
+{
+    double err(0);
+    if (MODE==2)
+    {
+        for (int i=0;i<_nx-2;++i)
+        {
+            for (int j=0;j<_ny-2;++j)
+            {
+                err+=(_grid->get(i,j)-sin(M_PI*(1-(j+1)*_dy/_b)))*(_grid->get(i,j)-sin(M_PI*(1-(j+1)*_dy/_b)));
+            }
+        }
+    }
+    return err/((_nx-2)*(_ny-2));
 }

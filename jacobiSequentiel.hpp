@@ -34,6 +34,7 @@ public:
     // -------- OTHER -------- // 
     double resolve();
     void saveData() const;
+    double error() const;
     
 };
 

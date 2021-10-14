@@ -4,12 +4,12 @@
 #SBATCH --output=output_%j.txt
 #SBATCH --error=error_%j.txt
 
-##SBATCH --partition=cpu_dist
-#SBATCH --partition=cpu_test
-##SBATCH --reservation=ams301_csp
+#SBATCH --partition=cpu_dist
+##SBATCH --partition=cpu_test
+#SBATCH --reservation=ams301_csp
 #SBATCH --account=ams301
 
-#SBATCH --ntasks=40
+#SBATCH --ntasks=1
 #SBATCH --time=00:10:00
 
 ## load modules
@@ -19,4 +19,4 @@ module load gmsh/4.8.4
 module load openmpi/4.1.0
 
 ## execution
-mpirun -display-map ${SLURM_SUBMIT_DIR}/a.out 1 1 1 0.5 632 632
+mpirun -display-map ${SLURM_SUBMIT_DIR}/a.out 1 1 1 0.5 100 100

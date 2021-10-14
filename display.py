@@ -68,11 +68,11 @@ L1000e = [406.828/p for p in P]
 plt.figure()
 plt.loglog(P,L100)
 plt.loglog(P,L100e)
-plt.savefig("scalForte100.png", dpi=150)
+plt.savefig("scalForteJ100.png", dpi=150)
 plt.figure()
 plt.loglog(P,L1000)
 plt.loglog(P,L1000e)
-plt.savefig("scalForte1000.png", dpi=150)
+plt.savefig("scalForteJ1000.png", dpi=150)
 
 P = [1,2,5,10,20,40,80]
 S1 = [100*np.sqrt(p) for p in P]
@@ -84,4 +84,30 @@ S = [L1[0]/L1[i] for i in range(0,len(L1))]
 plt.figure()
 plt.loglog(P,S)
 plt.loglog(P,[1 for i in range(len(S))])
-plt.savefig("scalFaible.png", dpi=150)
+plt.savefig("scalFaibleJ.png", dpi=150)
+
+P = [1,2,5,10,20,40,80]
+L100 = [3.32907,1.68622,0.729999,0.380173,0.230128,0.181992,0.195936]
+L100e = [3.32907/p for p in P]
+L1000 = [318.941,159.278,68.2452,34.9886,18.8786,12.0077,7.18206]
+L1000e = [318.941/p for p in P]
+plt.figure()
+plt.loglog(P,L100)
+plt.loglog(P,L100e)
+plt.savefig("scalForteG100.png", dpi=150)
+plt.figure()
+plt.loglog(P,L1000)
+plt.loglog(P,L1000e)
+plt.savefig("scalForteG1000.png", dpi=150)
+
+P = [1,2,5,10,20,40,80]
+S1 = [100*np.sqrt(p) for p in P]
+# [100, 141, 224, 316, 447, 632, 894]
+L1 = [3.32907,3.38073,3.42005,3.69482,4.09652,5.01967, 5.53075] # proportionnalite selon x et y
+S1 = [100*p for p in P]
+L2 = [3.01389,3.21376,3.29145,3.38424,3.60109,4.41684,4.82369] # selon x seulement
+S = [L1[0]/L1[i] for i in range(0,len(L1))]
+plt.figure()
+plt.loglog(P,S)
+plt.loglog(P,[1 for i in range(len(S))])
+plt.savefig("scalFaibleG.png", dpi=150)

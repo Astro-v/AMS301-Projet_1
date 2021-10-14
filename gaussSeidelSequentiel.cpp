@@ -55,19 +55,23 @@ double GaussSeidelSequentiel::resolve()
 {
     if (_myRank == 0)
     {
+        double diff(0);
         double timeInit = MPI_Wtime();
         int k = 0;
         do
         {
             k += 1;
+            diff = 0;
 
             // Compute next step for red
-            gaussSeidel(0);
+            diff += gaussSeidel(0);
 
             // Compute next step for black
-            gaussSeidel(1);
+            diff += gaussSeidel(1);
+            
+            diff = sqrt(diff/((_nx-2)*(_ny-2)));
 
-        }while (k<=MAX_STEP);
+        }while (k<=MAX_STEP && diff>=MAX_DIFF);
         double timeEnd = MPI_Wtime();
         return timeEnd-timeInit;
     }
@@ -87,13 +91,16 @@ void GaussSeidelSequentiel::saveData() const
 
 double GaussSeidelSequentiel::gaussSeidel(int step)
 {
+    double diff(0);
     double constant = _dx*_dx*_dy*_dy/(2.*_dx*_dx+2.*_dy*_dy);
+    double tmp(0);
     for (int i = 0;i<_nx-2;++i)
     {
         for (int j = 0;j<_ny-2;++j)
         {
             if ((i+j)%2==step) // if step = 0 we compute on even and odd if step = 1
             {
+                tmp = _grid->get(i,j);
                 _grid->get(i,j) = 0;
                 if (i>0)
                 {
@@ -135,9 +142,11 @@ double GaussSeidelSequentiel::gaussSeidel(int step)
                 {
                     _grid->get(i,j) -= constant*f2(i*_dx+_dx,j*_dy+_dy);
                 }
+                diff += (tmp-_grid->get(i,j))*(tmp-_grid->get(i,j));
             }
         }
     }
+    return diff;
 }
 
 void GaussSeidelSequentiel::initLimitCondition1()
@@ -186,4 +195,20 @@ double GaussSeidelSequentiel::f1(const double &x, const double &y) const
 double GaussSeidelSequentiel::f2(const double &x, const double &y) const
 {
     return -M_PI*M_PI/(_b*_b)*sin(M_PI*(1-y/_b));
+}
+
+double GaussSeidelSequentiel::error() const
+{
+    double err(0);
+    if (MODE==2)
+    {
+        for (int i=0;i<_nx-2;++i)
+        {
+            for (int j=0;j<_ny-2;++j)
+            {
+                err+=(_grid->get(i,j)-sin(M_PI*(1-(j+1)*_dy/_b)))*(_grid->get(i,j)-sin(M_PI*(1-(j+1)*_dy/_b)));
+            }
+        }
+    }
+    return err/((_nx-2)*(_ny-2));
 }
