@@ -16,7 +16,7 @@ _nx(atoi(argv[5])+1), _ny(atoi(argv[6])+1)
     MPI_Comm_size(MPI_COMM_WORLD, &_nbTasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &_myRank);
 
-    _grid = new Grid(0,0,_a,_b,_nx-2,_ny-2);
+    _grid = new Grid(0,0,_a,_b,_nx-2,_ny-2,_u0);
     _dx = _a/(_nx-1);
     _dy = _b/(_ny-1);
 
@@ -69,7 +69,7 @@ double GaussSeidelSequentiel::resolve()
             // Compute next step for black
             diff += gaussSeidel(1);
             
-            diff = sqrt(diff/((_nx-2)*(_ny-2)));
+            diff = sqrt(diff)/((_nx-2)*(_ny-2));
 
         }while (k<=MAX_STEP && diff>=MAX_DIFF);
         double timeEnd = MPI_Wtime();

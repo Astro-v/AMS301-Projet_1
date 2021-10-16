@@ -48,6 +48,27 @@ _nx(nx), _ny(ny)
     }
 }
 
+Grid::Grid(double x0, double y0, double xf, double yf, int nx, int ny, double u0):
+_x0(x0), _y0(y0),
+_xf(xf), _yf(yf),
+_nx(nx), _ny(ny)
+{
+    _dx2 = (_xf-_x0)/(_nx-1);
+    _dx2 = _dx2*_dx2;
+    _dy2 = (_yf-_y0)/(_ny-1);
+    _dy2 = _dy2*_dy2;
+
+    _grid = new double*[_nx];
+    for (int i(0);i<_nx;++i)
+    {
+        _grid[i] = new double[_ny];
+        for (int j(0);j<_ny;++j)
+        {
+            _grid[i][j] = u0;
+        }
+    }
+}
+
 Grid::Grid(double x0, double y0, double xf, double yf, int nx, int ny, double vec[]):
 _x0(x0), _y0(y0),
 _xf(xf), _yf(yf),

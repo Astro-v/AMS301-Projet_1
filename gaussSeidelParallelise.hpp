@@ -17,12 +17,14 @@ private:
     double *_left, *_right;
     double *_up, *_down;
     int _parity; // Parity of the pos (0,0) of _grid
+    double _error;
 
     // -------- OTHER -------- // 
     void init1();
     void init2();
     void gaussSeidel(int step); // Gauss Seidel method
     void exchangeData(); // Exchange data with the others process
+    void exchangeError(); // Exchange error with the others process
     double f1(const double &x, const double &y) const;
     double f2(const double &x, const double &y) const;
 

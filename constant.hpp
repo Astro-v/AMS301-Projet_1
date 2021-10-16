@@ -3,7 +3,7 @@
 #define __CONSTANT_HPP__
 
     #define MAX_STEP 10000 // 8000
-    #define MAX_DIFF 0.00005
+    #define MAX_DIFF 0.00000005
     #define MODE 2 // 1
 
     #define NX_INIT 100

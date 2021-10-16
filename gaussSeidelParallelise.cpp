@@ -12,7 +12,8 @@ GaussSeidelParallelise::GaussSeidelParallelise(int argc, char* argv[]):
 _a(atof(argv[1])), _b(atof(argv[2])),
 _u0(atof(argv[3])), _alpha(atof(argv[4])),
 _nx(atoi(argv[5])+1), _ny(atoi(argv[6])+1),
-_dx(_a/(_nx-1)), _dy(_b/(_ny-1))
+_dx(_a/(_nx-1)), _dy(_b/(_ny-1)),
+_error(0)
 {
     // Initialize MPI
     MPI_Comm_size(MPI_COMM_WORLD, &_nbTasks);
@@ -35,7 +36,7 @@ _dx(_a/(_nx-1)), _dy(_b/(_ny-1))
     _parity = nxPrevious%2;
 
     // Grid matrice
-    _grid = new Grid(_x0,_y0,_xf,_yf,_nxf,_nyf);
+    _grid = new Grid(_x0,_y0,_xf,_yf,_nxf,_nyf,_u0);
 
     // Limit condition
     _left = new double[_nyf];
@@ -134,6 +135,7 @@ double GaussSeidelParallelise::resolve()
     int k = 0;
     do
     {
+        _error = 0; 
         k += 1;
         // Exchanging data
         exchangeData();
@@ -143,8 +145,10 @@ double GaussSeidelParallelise::resolve()
         exchangeData();
         // Compute next step for black
         gaussSeidel(1);
+        // Exchanging error
+        exchangeError();
 
-    } while (k<=MAX_STEP);
+    } while (k<=MAX_STEP && _error>=MAX_DIFF);
     // Check time
     MPI_Barrier(MPI_COMM_WORLD);
     double timeEnd;
@@ -175,6 +179,7 @@ void GaussSeidelParallelise::saveData() const
 
 void GaussSeidelParallelise::gaussSeidel(int step)
 {
+    double tmp(0);
     double constant = _dx*_dx*_dy*_dy/(2.*_dx*_dx+2.*_dy*_dy);
     for (int i = 0;i<_nxf;++i)
     {
@@ -182,6 +187,7 @@ void GaussSeidelParallelise::gaussSeidel(int step)
         {
             if ((i+j+_parity)%2==step) // if step = 0 we compute on red and black if step = 1
             {
+                tmp = _grid->get(i,j);
                 _grid->get(i,j) = 0;
                 if (i>0)
                 {
@@ -223,9 +229,18 @@ void GaussSeidelParallelise::gaussSeidel(int step)
                 {
                     _grid->get(i,j) -= constant*f2(i*_dx+_x0,j*_dy+_y0);
                 }
+                _error += (tmp-_grid->get(i,j))*(tmp-_grid->get(i,j));
             }
         }
     }
+}
+
+void GaussSeidelParallelise::exchangeError()
+{
+    double error;
+    MPI_Allreduce(&_error, &error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    _error = error;
+    _error = sqrt(_error)/((_nx-2)*(_ny-2));
 }
 
 void GaussSeidelParallelise::exchangeData()

@@ -28,7 +28,7 @@ _dx(_a/(_nx-1)), _dy(_b/(_ny-1))
 
 
     // Grid matrice
-    _grid = new Grid(_x0,_y0,_xf,_yf,_nxf,_nyf);
+    _grid = new Grid(_x0,_y0,_xf,_yf,_nxf,_nyf,_u0);
 
     // Limit condition
     _left = new double[_nyf];
@@ -127,6 +127,7 @@ double JacobiParallelise::resolve()
     int k = 0;
     do
     {
+        _error = 0; 
         k += 1;
 
         // Exchanging data
@@ -135,7 +136,10 @@ double JacobiParallelise::resolve()
         // Compute next step
         jacobi();
 
-    } while (k<=MAX_STEP);
+        // Exchanging error
+        exchangeError();
+
+    } while (k<=MAX_STEP && _error>=MAX_DIFF);
     // Check time
     MPI_Barrier(MPI_COMM_WORLD);
     double timeEnd;
@@ -213,10 +217,19 @@ void JacobiParallelise::jacobi()
             {
                 newGrid->get(i,j) -= constant*f2(i*_dx+_x0,j*_dy+_y0);
             }
+            _error += (newGrid->get(i,j)-_grid->get(i,j))*(newGrid->get(i,j)-_grid->get(i,j));
         }
     }
     delete _grid;
     _grid = newGrid;
+}
+
+void JacobiParallelise::exchangeError()
+{
+    double error;
+    MPI_Allreduce(&_error, &error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    _error = error;
+    _error = sqrt(_error)/((_nx-2)*(_ny-2));
 }
 
 void JacobiParallelise::exchangeData()

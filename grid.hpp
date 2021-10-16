@@ -17,6 +17,7 @@
         // -------- CREATOR -------- //
         Grid();
         Grid(double x0, double y0, double xf, double yf, int nx, int ny);
+        Grid(double x0, double y0, double xf, double yf, int nx, int ny, double u0);
         Grid(double x0, double y0, double xf, double yf, int nx, int ny, double vec[]);
         
         // -------- DESTRUCTOR -------- //
