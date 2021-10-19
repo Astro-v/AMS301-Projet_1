@@ -66,12 +66,18 @@ L100e = [3.49605/p for p in P]
 L1000 = [406.828,204.353,86.8638,35.2449,17.9862,10.8216,5.85413]
 L1000e = [406.828/p for p in P]
 plt.figure()
-plt.loglog(P,L100)
-plt.loglog(P,L100e)
+plt.loglog(P,L100,label="Mesure")
+plt.loglog(P,L100e,label="Ideal")
+plt.xlabel("Nombre de processus")
+plt.ylabel("Temps de calcul")
+plt.legend()
 plt.savefig("scalForteJ100.png", dpi=150)
 plt.figure()
-plt.loglog(P,L1000)
-plt.loglog(P,L1000e)
+plt.loglog(P,L1000,label="Mesure")
+plt.loglog(P,L1000e,label="Ideal")
+plt.xlabel("Nombre de processus")
+plt.ylabel("Temps de calcul")
+plt.legend()
 plt.savefig("scalForteJ1000.png", dpi=150)
 
 P = [1,2,5,10,20,40,80]
@@ -82,8 +88,11 @@ S1 = [100*p for p in P]
 L2 = [3.01389,3.21376,3.29145,3.38424,3.60109,4.41684,4.82369] # selon x seulement
 S = [L1[0]/L1[i] for i in range(0,len(L1))]
 plt.figure()
-plt.loglog(P,S)
-plt.loglog(P,[1 for i in range(len(S))])
+plt.loglog(P,S,label="Mesure")
+plt.loglog(P,[1 for i in range(len(S))],label="Ideal")
+plt.xlabel("Nombre de processus")
+plt.ylabel("Efficacite")
+plt.legend()
 plt.savefig("scalFaibleJ.png", dpi=150)
 
 P = [1,2,5,10,20,40,80]
@@ -92,12 +101,18 @@ L100e = [3.32907/p for p in P]
 L1000 = [318.941,159.278,68.2452,34.9886,18.8786,12.0077,7.18206]
 L1000e = [318.941/p for p in P]
 plt.figure()
-plt.loglog(P,L100)
-plt.loglog(P,L100e)
+plt.loglog(P,L100,label="Mesure")
+plt.loglog(P,L100e,label="Ideal")
+plt.xlabel("Nombre de processus")
+plt.ylabel("Temps de calcul")
+plt.legend()
 plt.savefig("scalForteG100.png", dpi=150)
 plt.figure()
-plt.loglog(P,L1000)
-plt.loglog(P,L1000e)
+plt.loglog(P,L1000,label="Mesure")
+plt.loglog(P,L1000e,label="Ideal")
+plt.xlabel("Nombre de processus")
+plt.ylabel("Temps de calcul")
+plt.legend()
 plt.savefig("scalForteG1000.png", dpi=150)
 
 P = [1,2,5,10,20,40,80]
@@ -108,6 +123,9 @@ S1 = [100*p for p in P]
 L2 = [3.01389,3.21376,3.29145,3.38424,3.60109,4.41684,4.82369] # selon x seulement
 S = [L1[0]/L1[i] for i in range(0,len(L1))]
 plt.figure()
-plt.loglog(P,S)
-plt.loglog(P,[1 for i in range(len(S))])
+plt.loglog(P,S,label="Mesure")
+plt.loglog(P,[1 for i in range(len(S))],label="Ideal")
+plt.xlabel("Nombre de processus")
+plt.ylabel("Efficacite")
+plt.legend()
 plt.savefig("scalFaibleG.png", dpi=150)
