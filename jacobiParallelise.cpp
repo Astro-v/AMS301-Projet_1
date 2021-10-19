@@ -139,7 +139,7 @@ double JacobiParallelise::resolve()
         // Exchanging error
         exchangeError();
 
-    } while (k<=MAX_STEP && _error>=MAX_DIFF);
+    } while (k<=MAX_STEP); //&& _error>=MAX_DIFF);
     // Check time
     MPI_Barrier(MPI_COMM_WORLD);
     double timeEnd;

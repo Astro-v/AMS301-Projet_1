@@ -6,7 +6,7 @@ Probleme sur grille structure
 mpicxx *.cpp
 
 mpirun -np 4 ./a.out 'a' 'b' 'U0' 'alpha' 'Nx' 'Ny'
-mpirun -np 4 ./a.out 1 1 1 0.5 11 11
+mpirun -np 4 ./a.out 1 1 1 0.5 100 100
 
 */
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     {
         JacobiSequentiel seqJ(argc,argv);
         double timeSeq = seqJ.resolve();
-        seqJ.saveData();
+        // seqJ.saveData();
         cout << "Temps pour jacobi séquentiel : " << timeSeq << endl;
         cout << "Erreur : " << seqJ.error() << endl;
     }
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
             
     JacobiParallelise parJ(argc,argv);
     double timeParJ = parJ.resolve();
-    parJ.saveData();
+    // parJ.saveData();
     if (myRank==0)
     {
         cout << "Temps pour jacobi parallelise pour " << nbTasks << " coeur : " << timeParJ << endl;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
     {
         GaussSeidelSequentiel seqG(argc,argv);
         double timeSeq = seqG.resolve();
-        seqG.saveData();
+        // seqG.saveData();
         cout << "Temps pour Gauss-Seidel sequentiel : " << timeSeq << endl;
         cout << "Erreur : " << seqG.error() << endl;
     }
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
             
     GaussSeidelParallelise parG(argc,argv);
     double timeParG = parG.resolve();
-    parG.saveData();
+    // parG.saveData();
     if (myRank==0)
     {
         cout << "Temps pour Gauss-Seidel parallelise pour " << nbTasks << " coeur : " << timeParG << endl;
